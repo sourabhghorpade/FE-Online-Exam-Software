@@ -134,8 +134,6 @@ Test test=(Test)session.getAttribute("test");
 	<div id="logo"><img src="images/ascilogo.png" height="150"></div><!-- End logo div-->
 
 	<b><%=user.getYr() + " Test"%></b>
-	<div style="position:relative;clear:right;float:right;padding-right:20px;"><br><input type="submit"  name="next" value="End Test" onclick="return ty()"></div>
-
 	</div><!-- End header div-->
 <script>
 function start()
@@ -229,13 +227,15 @@ function timer()
 <input type="submit" name="qno" id="qno23" value="23" onclick="return end()"> 
 <input type="submit" name="qno" id="qno24" value="24" onclick="return end()"> 
 <input type="submit" name="qno" id="qno25" value="25" onclick="return end()"> 
+</div>
+
+<div id='options'> 
+<input type="submit" name="qno" id="mark" value="Mark" onclick="return end()">
 <input type="submit" name="qno" id="next" value="Next" onclick="return end()"> 
 <input type="submit" name="qno" id="prev" value="Previous" onclick="return end()"> 
 <input type="submit" name="qno" id="clear" value="Clear Selection" onclick="return end()"> 
-<input type="submit" name="qno" id="mark" value="Mark" onclick="return end()"> 
-
+<input type="submit" name="qno" id="finish test" value="Finish Test" onclick="return ty()">
 </div>
-
 <br>
 </form>
 

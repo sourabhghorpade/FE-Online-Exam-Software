@@ -10,7 +10,6 @@
 <%User user=(User)session.getAttribute("user");
 Test test=(Test)session.getAttribute("test");
 %>
-Loading next Question...Please Wait
 <%
 String qno=request.getParameter("qno");
 String option="";
@@ -40,6 +39,11 @@ if(!qno.equals("Finish Test"))
 		{
 			test.setCurrentQuestionNumber(Integer.parseInt(qno)-1); 
 		}
+		out.print("Loading Question...Please Wait");
+	}
+	else
+	{
+		out.print("Loading Question List...Please Wait");
 	}
 }
 %>

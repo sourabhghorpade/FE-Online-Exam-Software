@@ -57,8 +57,7 @@
 			int arguments[]={5,1,3,2,3,1,6,2,5,1,3,2};
 			Test test=new Test(arguments,subject);
 			test.setFlag(1);
-			session.setAttribute("test", test);
-			 
+			session.setAttribute("test", test);			 
 			%>
 			<script>
 			window.location="rules.jsp";

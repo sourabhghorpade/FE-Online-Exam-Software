@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Random;
 
+import org.omg.CORBA.DynAnyPackage.InvalidValue;
+
 public class Test
 	{
 		private static final String NAME_OF_DRIVER = "FE_DB";
@@ -15,9 +17,8 @@ public class Test
 		private int currentQuestionNumber;
 		private int flag = 0;
 
-		public static void addTest(String testName,
-				int numberOfQuestionsPerUnitLevelwise[],final int NUMBER_OF_UNITS) throws ClassNotFoundException,
-				SQLException
+		public static void addTest(TestConfiguration testConfiguration)
+				throws ClassNotFoundException, SQLException, InvalidValue
 			{
 				int NONE = 0;
 				int LEVEL1 = 1, LEVEL2 = 2;
@@ -25,57 +26,58 @@ public class Test
 				try
 					{
 						databaseConnection = new DatabaseConnection("FE_DB");
-						try
+						databaseConnection
+								.executeUpdate("insert into test_configuration values('"
+										+ testConfiguration.getTestName() + "');");
+						for (int unitNumber = 1, counter = 0; unitNumber <= testConfiguration
+								.getNumberOfUnits(); unitNumber++, counter += 2)
 							{
-								databaseConnection
-										.executeUpdate("insert into test_configuration values('"
-												+ testName + "');");
-							}
-						catch (SQLException duplicateTestName)
-							{
-								throw new SQLException(
-										"Test already exists.Please Choose a different name.");
-							}
-						for (int unitNumber = 1,counter=0; unitNumber <= NUMBER_OF_UNITS;unitNumber++,counter+=2)
-							{
-								if (numberOfQuestionsPerUnitLevelwise[counter] == NONE
-										&& numberOfQuestionsPerUnitLevelwise[counter + 1] == NONE)
+								if (testConfiguration
+										.getNumberOfQuestionPerUnitLevelwise()[counter] == NONE
+										&& testConfiguration
+												.getNumberOfQuestionPerUnitLevelwise()[counter + 1] == NONE)
 									continue;
 								try
 									{
-										String Query="insert into config_details values('"
-												+ testName
+										String Query = "insert into config_details values('"
+												+ testConfiguration.getTestName()
 												+ "',"
 												+ (unitNumber)
 												+ ","
 												+ LEVEL1
 												+ ","
-												+ numberOfQuestionsPerUnitLevelwise[counter]
+												+ testConfiguration
+														.getNumberOfQuestionPerUnitLevelwise()[counter]
 												+ ");";
-										databaseConnection
-												.executeUpdate(Query);
-										Query="insert into config_details values('"
-												+ testName
+										databaseConnection.executeUpdate(Query);
+										Query = "insert into config_details values('"
+												+ testConfiguration.getTestName()
 												+ "',"
 												+ (unitNumber)
 												+ ","
 												+ LEVEL2
 												+ ","
-												+ numberOfQuestionsPerUnitLevelwise[counter + 1]
+												+ testConfiguration
+														.getNumberOfQuestionPerUnitLevelwise()[counter + 1]
 												+ ");";
-										databaseConnection
-												.executeUpdate(Query);
+										databaseConnection.executeUpdate(Query);
 
 									}
 								catch (SQLException duplicateRecord)
 									{
 										duplicateRecord.printStackTrace();
-										databaseConnection.executeUpdate("delete from test_configuration where testName='"+ testName +"';");
-										throw new SQLException("Duplicate Record.");
+										databaseConnection
+												.executeUpdate("delete from test_configuration where testName='"
+														+ testConfiguration.getTestName()
+														+ "';");
+										throw new InvalidValue("Duplicate Record.");
 									}
-								catch(Exception e)
+								catch (Exception e)
 									{
-										databaseConnection.executeUpdate("delete from test_configuration where testName='"+ testName +"';");
+										databaseConnection
+												.executeUpdate("delete from test_configuration where testName='"
+														+ testConfiguration.getTestName()
+														+ "';");
 									}
 							}
 					}
@@ -84,13 +86,6 @@ public class Test
 						if (databaseConnection != null)
 							databaseConnection.disconnect();
 					}
-			}
-
-		public static void main(String args[]) throws Exception
-			{
-				
-				int[] numberOfQuestionsPerUnitLevelwise={1,2,3,4};
-				Test.addTest("Phy", numberOfQuestionsPerUnitLevelwise, 2);
 			}
 
 		public void showQuestionSet() throws ClassNotFoundException, SQLException

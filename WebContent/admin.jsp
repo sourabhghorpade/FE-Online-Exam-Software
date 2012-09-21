@@ -1,3 +1,4 @@
+<%@page import="myBeans.TestConfiguration"%>
 <%@page import="myBeans.Test"%>
 <%@page import="java.sql.*"%>
 <%@page import="myBeans.DatabaseConnection"%>
@@ -32,8 +33,8 @@ for(int unitNumber=0,counter=0;unitNumber<NUMBER_OF_UNITS;unitNumber++,counter+=
 	}
 try
 	{
-	if(testName!=null)	
-		Test.addTest(testName, numberOfQuestionsPerUnitLevelwise,NUMBER_OF_UNITS);
+		TestConfiguration testConfiguration=new TestConfiguration(testName, numberOfQuestionsPerUnitLevelwise,NUMBER_OF_UNITS);
+		Test.addTest(testConfiguration);
 	}
 catch(ClassNotFoundException exception)
 	{
@@ -42,6 +43,10 @@ catch(ClassNotFoundException exception)
 catch(SQLException duplicateRecords)
 	{
 		out.println(duplicateRecords.getMessage());
+	}
+catch(Exception e)
+	{
+		out.println(e.getMessage());
 	}
 %>
 <form action="admin.jsp" method="get">

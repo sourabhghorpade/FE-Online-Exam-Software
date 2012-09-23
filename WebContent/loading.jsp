@@ -56,7 +56,7 @@
 			User user=new User(username,passsword);
 			session.setAttribute("user",user);
 			String subject=request.getParameter("subject");
-			int arguments[]={5,1,3,2,3,1,6,2,5,1,3,2};
+			
 			TestConfiguration testConfiguration= TestConfiguration.retrieveTestConfiguration(subject);
 			Test test=new Test(testConfiguration);
 			test.setFlag(1);

@@ -7,7 +7,7 @@ import myBeans.TestConfiguration;
 import org.junit.Test;
 import org.omg.CORBA.DynAnyPackage.InvalidValue;
 
-public class Test_TestConfigurationClass
+class Test_TestConfigurationClass
 	{
 		@Test(expected = InvalidValue.class)
 		public void ShouldNotAcceptNullAsTestName() throws NullPointerException,

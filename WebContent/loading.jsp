@@ -1,4 +1,6 @@
 
+<%@page import="myBeans.TestConfiguration"%>
+<%@page import="test.Test_TestConfigurationClass"%>
 <%@page import="myBeans.Test"%>
 <%@page import="myBeans.User"%>
 <%@page import="java.sql.*"%>
@@ -55,7 +57,8 @@
 			session.setAttribute("user",user);
 			String subject=request.getParameter("subject");
 			int arguments[]={5,1,3,2,3,1,6,2,5,1,3,2};
-			Test test=new Test(arguments,subject);
+			TestConfiguration testConfiguration= TestConfiguration.retrieveTestConfiguration(subject);
+			Test test=new Test(testConfiguration);
 			test.setFlag(1);
 			session.setAttribute("test", test);			 
 			%>

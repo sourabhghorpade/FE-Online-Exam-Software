@@ -4,90 +4,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Random;
 
-import org.omg.CORBA.DynAnyPackage.InvalidValue;
-
 public class Test
 	{
 		private static final String NAME_OF_DRIVER = "FE_DB";
+		private TestConfiguration testConfiguration;
 		private String testName;
-		private static final int NUMBER_OF_UNITS_IN_CURRENT_TEST = 6;
+		private final int NUMBER_OF_UNITS_IN_CURRENT_TEST;
 		private Question questionSet[];
 		private String Question, Option1, Option2, Option3, Option4;
 		public int answerSelected[], answers[], level[];
 		private int currentQuestionNumber;
 		private int flag = 0;
 
-		public static void addTest(TestConfiguration testConfiguration)
-				throws ClassNotFoundException, SQLException, InvalidValue
-			{
-				int NONE = 0;
-				int LEVEL1 = 1, LEVEL2 = 2;
-				DatabaseConnection databaseConnection = null;
-				try
-					{
-						databaseConnection = new DatabaseConnection("FE_DB");
-						databaseConnection
-								.executeUpdate("insert into test_configuration values('"
-										+ testConfiguration.getTestName() + "');");
-						for (int unitNumber = 1, counter = 0; unitNumber <= testConfiguration
-								.getNumberOfUnits(); unitNumber++, counter += 2)
-							{
-								if (testConfiguration
-										.getNumberOfQuestionPerUnitLevelwise()[counter] == NONE
-										&& testConfiguration
-												.getNumberOfQuestionPerUnitLevelwise()[counter + 1] == NONE)
-									continue;
-								try
-									{
-										String Query = "insert into config_details values('"
-												+ testConfiguration.getTestName()
-												+ "',"
-												+ (unitNumber)
-												+ ","
-												+ LEVEL1
-												+ ","
-												+ testConfiguration
-														.getNumberOfQuestionPerUnitLevelwise()[counter]
-												+ ");";
-										databaseConnection.executeUpdate(Query);
-										Query = "insert into config_details values('"
-												+ testConfiguration.getTestName()
-												+ "',"
-												+ (unitNumber)
-												+ ","
-												+ LEVEL2
-												+ ","
-												+ testConfiguration
-														.getNumberOfQuestionPerUnitLevelwise()[counter + 1]
-												+ ");";
-										databaseConnection.executeUpdate(Query);
-
-									}
-								catch (SQLException duplicateRecord)
-									{
-										duplicateRecord.printStackTrace();
-										databaseConnection
-												.executeUpdate("delete from test_configuration where testName='"
-														+ testConfiguration.getTestName()
-														+ "';");
-										throw new InvalidValue("Duplicate Record.");
-									}
-								catch (Exception e)
-									{
-										databaseConnection
-												.executeUpdate("delete from test_configuration where testName='"
-														+ testConfiguration.getTestName()
-														+ "';");
-									}
-							}
-					}
-				finally
-					{
-						if (databaseConnection != null)
-							databaseConnection.disconnect();
-					}
-			}
-
+		
 		public void showQuestionSet() throws ClassNotFoundException, SQLException
 			{
 				int counter;
@@ -97,8 +26,7 @@ public class Test
 					}
 			}
 
-		public void retrieveQuestion(int index) throws ClassNotFoundException,
-				SQLException
+		public void retrieveQuestion(int index) throws ClassNotFoundException, SQLException
 			{
 				String question[] = questionSet[index].getQuestionDetails();
 				setQuestion(question[0]);
@@ -110,18 +38,15 @@ public class Test
 				setLevel(index, questionSet[index].getLevel());
 			}
 
-		private int[] getTableLimit(int level) throws ClassNotFoundException,
-				SQLException
+		private int[] getTableLimit(int level) throws ClassNotFoundException, SQLException
 			{
 				int limits[];
 				limits = new int[NUMBER_OF_UNITS_IN_CURRENT_TEST];
-				DatabaseConnection databaseConnection = new DatabaseConnection(
-						NAME_OF_DRIVER);
+				DatabaseConnection databaseConnection = new DatabaseConnection(NAME_OF_DRIVER);
 				String query;
 				for (int counter = 1; counter <= limits.length; counter++)
 					{
-						query = "select count(*) from " + testName + counter + "_"
-								+ level + ";";
+						query = "select count(*) from " + testName + counter + "_" + level + ";";
 						ResultSet resultSet = databaseConnection.executeQuery(query);
 						resultSet.next();
 						limits[counter - 1] = resultSet.getInt(1);
@@ -130,14 +55,17 @@ public class Test
 				return limits;
 			}
 
-		public Test(int[] arguments, String testName) throws ClassNotFoundException,
-				SQLException
+		public Test(TestConfiguration testConfiguration) throws ClassNotFoundException, SQLException
 			{
-
+				this.testConfiguration=testConfiguration;
+				int arguments[]=testConfiguration.getNumberOfQuestionPerUnitLevelwise();
+				this.testName = this.testConfiguration.getTestName();
+				this.NUMBER_OF_UNITS_IN_CURRENT_TEST=testConfiguration.getNumberOfUnits();
+				
 				int counter, anotherCounter, number, limitForTable, unitPointer = 0, noOfDifficultQns, questionCounter = 0;
-				this.testName = testName;
-				totalNumberOfQuestions = arguments[0] + arguments[2] + arguments[4]
-						+ arguments[6] + arguments[8] + arguments[10];
+				
+				totalNumberOfQuestions = arguments[0] + arguments[2] + arguments[4] + arguments[6]
+						+ arguments[8] + arguments[10];
 				questionSet = new Question[totalNumberOfQuestions];
 				answerSelected = new int[totalNumberOfQuestions];
 				level = new int[totalNumberOfQuestions];
@@ -167,62 +95,14 @@ public class Test
 									}
 								number = random.nextInt(selectedTableLimit[counter]);
 								if (number == 0
-										|| this.checkForDuplicate(questionCounter,
-												new Question(number, counter + 1, 1,
-														testName)))
+										|| this.checkForDuplicate(questionCounter, new Question(
+												number, counter + 1, 1, testName)))
 									{
 										anotherCounter--;
 										continue;
 									}
-								questionSet[questionCounter++] = new Question(number,
-										counter + 1, questionLevel, testName);
-							}
-					}
-			}
-
-		public Test(int[] arguments) throws ClassNotFoundException, SQLException
-			{
-				int counter, anotherCounter, number, limitForTable, unitPointer = 0, noOfDifficultQns, questionCounter = 0;
-				totalNumberOfQuestions = arguments[0] + arguments[2] + arguments[4]
-						+ arguments[6] + arguments[8] + arguments[10];
-				questionSet = new Question[totalNumberOfQuestions];
-				answerSelected = new int[totalNumberOfQuestions];
-				level = new int[totalNumberOfQuestions];
-				answers = new int[totalNumberOfQuestions];
-				marked = new boolean[totalNumberOfQuestions];
-				currentQuestionNumber = 0;
-				int limitOfLevel1Questions[] = getTableLimit(1);
-				int limitOfLevel2Questions[] = getTableLimit(2);
-
-				Random random = new Random();
-				for (counter = 0; counter < NUMBER_OF_UNITS_IN_CURRENT_TEST; counter++, unitPointer += 2)
-					{
-						limitForTable = arguments[unitPointer];
-						noOfDifficultQns = arguments[unitPointer + 1];
-						for (anotherCounter = 0; anotherCounter < limitForTable; anotherCounter++)
-							{
-								int questionLevel;
-								int selectedTableLimit[];
-								if (anotherCounter < limitForTable - noOfDifficultQns)
-									{
-										questionLevel = 1;
-										selectedTableLimit = limitOfLevel1Questions;
-									} else
-									{
-										questionLevel = 2;
-										selectedTableLimit = limitOfLevel2Questions;
-									}
-								number = random.nextInt(selectedTableLimit[counter]);
-								if (number == 0
-										|| this.checkForDuplicate(questionCounter,
-												new Question(number, counter + 1, 1,
-														testName)))
-									{
-										anotherCounter--;
-										continue;
-									}
-								questionSet[questionCounter++] = new Question(number,
-										counter + 1, questionLevel, testName);
+								questionSet[questionCounter++] = new Question(number, counter + 1,
+										questionLevel, testName);
 							}
 					}
 			}

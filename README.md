@@ -1,4 +1,4 @@
 FE-Online-Exam-Software
 =======================
 
-This is the repo for the FE Online Exam
+This is the repository for the mock FE Online Exam of Pune University 
